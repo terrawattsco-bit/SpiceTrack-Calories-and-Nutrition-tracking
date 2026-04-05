@@ -3,8 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-  // This tells Vite that the project is in the current folder
-  root: "./",
+  // This tells Vite exactly where your files live
+  root: path.resolve(import.meta.dirname),
   base: "./", 
   plugins: [react()],
   resolve: {
@@ -13,8 +13,8 @@ export default defineConfig({
     },
   },
   build: {
-    // This tells Vite to put the 'dist' folder inside this subfolder
-    outDir: "dist",
+    // This puts the output 'dist' folder in the right place
+    outDir: path.resolve(import.meta.dirname, "../../dist"),
     emptyOutDir: true,
   }
 });
