@@ -1,282 +1,191 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
-@import "tailwindcss";
-@import "tw-animate-css";
-@plugin "@tailwindcss/typography";
+import * as React from "react"
 
-@custom-variant dark (&:is(.dark *));
+import type {
+  ToastActionElement,
+  ToastProps,
+} from "@/components/ui/toast"
 
-@theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+const TOAST_LIMIT = 1
+const TOAST_REMOVE_DELAY = 1000000
 
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-card-border: hsl(var(--card-border));
-
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-popover-border: hsl(var(--popover-border));
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-primary-border: var(--primary-border);
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-secondary-border: var(--secondary-border);
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-muted-border: var(--muted-border);
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-accent-border: var(--accent-border);
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-destructive-border: var(--destructive-border);
-
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-
-  --color-sidebar: hsl(var(--sidebar));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-primary-border: var(--sidebar-primary-border);
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-accent-border: var(--sidebar-accent-border);
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
-
-  --font-sans: var(--app-font-sans);
-  --font-serif: var(--app-font-serif);
-  --font-mono: var(--app-font-mono);
-
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
 }
 
-/* LIGHT MODE */
-:root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
-  --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+const actionTypes = {
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST",
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
+} as const
 
-  /* Warm cream/off-white background */
-  --background: 44 24% 96%;
-  --foreground: 30 14% 14%;
-  
-  --border: 30 15% 85%;
-  --input: 30 15% 85%;
-  --ring: 15 62% 52%;
+let count = 0
 
-  --card: 44 20% 98%;
-  --card-foreground: 30 14% 14%;
-  --card-border: 30 15% 90%;
-
-  --sidebar: 44 24% 96%;
-  --sidebar-foreground: 30 14% 14%;
-  --sidebar-border: 30 15% 85%;
-  --sidebar-primary: 15 62% 52%;
-  --sidebar-primary-foreground: 44 24% 96%;
-  --sidebar-accent: 30 15% 90%;
-  --sidebar-accent-foreground: 30 14% 14%;
-  --sidebar-ring: 15 62% 52%;
-
-  --popover: 44 20% 98%;
-  --popover-foreground: 30 14% 14%;
-  --popover-border: 30 15% 85%;
-
-  /* Terracotta */
-  --primary: 15 62% 52%;
-  --primary-foreground: 0 0% 100%;
-
-  /* Deep Forest Green */
-  --secondary: 158 35% 24%;
-  --secondary-foreground: 0 0% 100%;
-
-  /* Turmeric Gold */
-  --accent: 38 88% 51%;
-  --accent-foreground: 30 14% 14%;
-
-  --muted: 35 15% 90%;
-  --muted-foreground: 30 10% 40%;
-
-  --destructive: 0 70% 50%;
-  --destructive-foreground: 0 0% 100%;
-
-  /* Charts */
-  --chart-1: 15 62% 52%; /* Terracotta */
-  --chart-2: 38 88% 51%; /* Turmeric */
-  --chart-3: 158 35% 24%; /* Forest Green */
-  --chart-4: 345 50% 45%; /* Deep Red */
-  --chart-5: 25 40% 65%; /* Soft Earth */
-
-  --app-font-sans: 'Plus Jakarta Sans', sans-serif;
-  --app-font-serif: 'Fraunces', serif;
-  --app-font-mono: Menlo, monospace;
-  --radius: 0.75rem; 
-
-  --shadow-2xs: 0px 2px 0px 0px rgba(44, 38, 33, 0.02);
-  --shadow-xs: 0px 2px 0px 0px rgba(44, 38, 33, 0.04);
-  --shadow-sm: 0px 2px 0px 0px rgba(44, 38, 33, 0.05), 0px 1px 2px -1px rgba(44, 38, 33, 0.05);
-  --shadow: 0px 4px 6px -1px rgba(44, 38, 33, 0.06), 0px 2px 4px -1px rgba(44, 38, 33, 0.04);
-  --shadow-md: 0px 6px 12px -2px rgba(44, 38, 33, 0.08), 0px 3px 6px -3px rgba(44, 38, 33, 0.04);
-  --shadow-lg: 0px 10px 15px -3px rgba(44, 38, 33, 0.1), 0px 4px 6px -4px rgba(44, 38, 33, 0.05);
-  --shadow-xl: 0px 20px 25px -5px rgba(44, 38, 33, 0.1), 0px 8px 10px -6px rgba(44, 38, 33, 0.05);
-  --shadow-2xl: 0px 25px 50px -12px rgba(44, 38, 33, 0.15);
-  --tracking-normal: -0.015em;
-
-  --sidebar-primary-border: hsl(var(--sidebar-primary));
-  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
-  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --primary-border: hsl(var(--primary));
-  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --secondary-border: hsl(var(--secondary));
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --muted-border: hsl(var(--muted));
-  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --accent-border: hsl(var(--accent));
-  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --destructive-border: hsl(var(--destructive));
-  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
 }
 
-.dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
-  --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+type ActionType = typeof actionTypes
 
-  /* Warm dark mode - Deep mocha/brown tones rather than harsh black */
-  --background: 30 20% 12%;
-  --foreground: 44 24% 92%;
-  
-  --border: 30 15% 20%;
-  --input: 30 15% 20%;
-  --ring: 15 62% 52%;
+type Action =
+  | {
+      type: ActionType["ADD_TOAST"]
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType["UPDATE_TOAST"]
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType["DISMISS_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
+  | {
+      type: ActionType["REMOVE_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
 
-  --card: 30 18% 15%;
-  --card-foreground: 44 24% 92%;
-  --card-border: 30 15% 22%;
-
-  --sidebar: 30 20% 12%;
-  --sidebar-foreground: 44 24% 92%;
-  --sidebar-border: 30 15% 20%;
-  --sidebar-primary: 15 62% 52%;
-  --sidebar-primary-foreground: 44 24% 96%;
-  --sidebar-accent: 30 18% 18%;
-  --sidebar-accent-foreground: 44 24% 92%;
-  --sidebar-ring: 15 62% 52%;
-
-  --popover: 30 18% 15%;
-  --popover-foreground: 44 24% 92%;
-  --popover-border: 30 15% 22%;
-
-  --primary: 15 62% 52%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 158 30% 30%;
-  --secondary-foreground: 0 0% 100%;
-
-  --accent: 38 80% 55%;
-  --accent-foreground: 30 20% 12%;
-
-  --muted: 30 15% 20%;
-  --muted-foreground: 44 15% 70%;
-
-  --destructive: 0 60% 45%;
-  --destructive-foreground: 0 0% 100%;
-
-  --chart-1: 15 62% 52%;
-  --chart-2: 38 88% 51%;
-  --chart-3: 158 35% 40%;
-  --chart-4: 345 50% 55%;
-  --chart-5: 25 40% 45%;
+interface State {
+  toasts: ToasterToast[]
 }
 
-@layer base {
-  * {
-    @apply border-border;
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
+const addToRemoveQueue = (toastId: string) => {
+  if (toastTimeouts.has(toastId)) {
+    return
   }
-  body {
-    @apply font-sans antialiased bg-background text-foreground selection:bg-primary/20 selection:text-primary;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif tracking-tight text-foreground;
+
+  const timeout = setTimeout(() => {
+    toastTimeouts.delete(toastId)
+    dispatch({
+      type: "REMOVE_TOAST",
+      toastId: toastId,
+    })
+  }, TOAST_REMOVE_DELAY)
+
+  toastTimeouts.set(toastId, timeout)
+}
+
+export const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "ADD_TOAST":
+      return {
+        ...state,
+        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+      }
+
+    case "UPDATE_TOAST":
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === action.toast.id ? { ...t, ...action.toast } : t
+        ),
+      }
+
+    case "DISMISS_TOAST": {
+      const { toastId } = action
+
+      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // but I'll keep it here for simplicity
+      if (toastId) {
+        addToRemoveQueue(toastId)
+      } else {
+        state.toasts.forEach((toast) => {
+          addToRemoveQueue(toast.id)
+        })
+      }
+
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === toastId || toastId === undefined
+            ? {
+                ...t,
+                open: false,
+              }
+            : t
+        ),
+      }
+    }
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) {
+        return {
+          ...state,
+          toasts: [],
+        }
+      }
+      return {
+        ...state,
+        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+      }
   }
 }
 
-@layer utilities {
-  input[type="search"]::-webkit-search-cancel-button {
-    @apply hidden;
-  }
-  [contenteditable][data-placeholder]:empty::before {
-    content: attr(data-placeholder);
-    color: hsl(var(--muted-foreground));
-    pointer-events: none;
-  }
-  .toggle-elevate::before,
-  .toggle-elevate-2::before {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0px;
-    border-radius: inherit;
-    z-index: -1;
-  }
-  .toggle-elevate.toggle-elevated::before {
-    background-color: var(--elevate-2);
-  }
-  .border.toggle-elevate::before {
-    inset: -1px;
-  }
-  .hover-elevate:not(.no-default-hover-elevate),
-  .active-elevate:not(.no-default-active-elevate),
-  .hover-elevate-2:not(.no-default-hover-elevate),
-  .active-elevate-2:not(.no-default-active-elevate) {
-    position: relative;
-    z-index: 0;
-  }
-  .hover-elevate:not(.no-default-hover-elevate)::after,
-  .active-elevate:not(.no-default-active-elevate)::after,
-  .hover-elevate-2:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:not(.no-default-active-elevate)::after {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0px;
-    border-radius: inherit;
-    z-index: 999;
-  }
-  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-1);
-  }
-  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-2);
-  }
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
-    inset: -1px;
+const listeners: Array<(state: State) => void> = []
+
+let memoryState: State = { toasts: [] }
+
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
+  listeners.forEach((listener) => {
+    listener(memoryState)
+  })
+}
+
+type Toast = Omit<ToasterToast, "id">
+
+function toast({ ...props }: Toast) {
+  const id = genId()
+
+  const update = (props: ToasterToast) =>
+    dispatch({
+      type: "UPDATE_TOAST",
+      toast: { ...props, id },
+    })
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
+  dispatch({
+    type: "ADD_TOAST",
+    toast: {
+      ...props,
+      id,
+      open: true,
+      onOpenChange: (open) => {
+        if (!open) dismiss()
+      },
+    },
+  })
+
+  return {
+    id: id,
+    dismiss,
+    update,
   }
 }
+
+function useToast() {
+  const [state, setState] = React.useState<State>(memoryState)
+
+  React.useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }, [state])
+
+  return {
+    ...state,
+    toast,
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
+}
+
+export { useToast, toast }
