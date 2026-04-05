@@ -3,18 +3,18 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-  // This tells Vite exactly where your files live
-  root: path.resolve(import.meta.dirname),
+  // This handles relative paths for Cloudflare Pages
   base: "./", 
   plugins: [react()],
   resolve: {
     alias: {
+      // Maps "@" to your src folder
       "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   build: {
-    // This puts the output 'dist' folder in the right place
-    outDir: path.resolve(import.meta.dirname, "../../dist"),
+    // Just 'dist' is safer; Vite will put it inside artifacts/afro-cal/dist
+    outDir: "dist",
     emptyOutDir: true,
   }
 });
