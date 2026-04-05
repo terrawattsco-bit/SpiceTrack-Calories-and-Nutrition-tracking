@@ -3,11 +3,13 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
+  // This ensures paths work correctly on Cloudflare
   base: "./", 
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "./src"),
+      // Simplest way to handle the "@" alias
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   build: {
