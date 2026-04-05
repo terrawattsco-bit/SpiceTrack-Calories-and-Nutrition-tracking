@@ -1,0 +1,647 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: AfroCal - African & Caribbean Nutrition Tracker API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: foods
+    description: African & Caribbean food database
+  - name: meals
+    description: Meal logging
+  - name: nutrition
+    description: Nutrition tracking and summaries
+  - name: goals
+    description: User nutrition goals
+  - name: ai
+    description: AI food recognition
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /foods:
+    get:
+      operationId: listFoods
+      tags: [foods]
+      summary: List foods
+      description: Search and list African & Caribbean foods
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search query
+        - name: region
+          in: query
+          schema:
+            type: string
+          description: Filter by region (e.g. West African, Caribbean, East African)
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category (e.g. Soups, Rice Dishes, Snacks)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: List of foods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Food"
+
+  /foods/{id}:
+    get:
+      operationId: getFood
+      tags: [foods]
+      summary: Get food by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Food details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Food"
+        "404":
+          description: Food not found
+
+  /foods/popular:
+    get:
+      operationId: getPopularFoods
+      tags: [foods]
+      summary: Get popular foods
+      description: Returns the most frequently logged African & Caribbean foods
+      responses:
+        "200":
+          description: Popular foods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Food"
+
+  /meals:
+    get:
+      operationId: listMeals
+      tags: [meals]
+      summary: List meals
+      description: Get meal entries for a date range
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+          description: Date in YYYY-MM-DD format (defaults to today)
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: Start date for range queries YYYY-MM-DD
+        - name: endDate
+          in: query
+          schema:
+            type: string
+          description: End date for range queries YYYY-MM-DD
+      responses:
+        "200":
+          description: List of meal entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MealEntry"
+    post:
+      operationId: createMeal
+      tags: [meals]
+      summary: Log a meal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMealBody"
+      responses:
+        "201":
+          description: Meal logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealEntry"
+
+  /meals/{id}:
+    get:
+      operationId: getMeal
+      tags: [meals]
+      summary: Get meal by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Meal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealEntry"
+        "404":
+          description: Meal not found
+    patch:
+      operationId: updateMeal
+      tags: [meals]
+      summary: Update a meal entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMealBody"
+      responses:
+        "200":
+          description: Updated meal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealEntry"
+    delete:
+      operationId: deleteMeal
+      tags: [meals]
+      summary: Delete a meal entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Meal deleted
+
+  /nutrition/daily:
+    get:
+      operationId: getDailyNutrition
+      tags: [nutrition]
+      summary: Get daily nutrition summary
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+          description: Date in YYYY-MM-DD format (defaults to today)
+      responses:
+        "200":
+          description: Daily nutrition summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyNutrition"
+
+  /nutrition/weekly:
+    get:
+      operationId: getWeeklyNutrition
+      tags: [nutrition]
+      summary: Get weekly nutrition summary
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: Start date YYYY-MM-DD (defaults to 7 days ago)
+      responses:
+        "200":
+          description: Weekly nutrition data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyNutrition"
+
+  /nutrition/streaks:
+    get:
+      operationId: getNutritionStreaks
+      tags: [nutrition]
+      summary: Get user tracking streaks and achievements
+      responses:
+        "200":
+          description: Streak information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutritionStreaks"
+
+  /goals:
+    get:
+      operationId: getGoals
+      tags: [goals]
+      summary: Get user nutrition goals
+      responses:
+        "200":
+          description: User goals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goals"
+    put:
+      operationId: updateGoals
+      tags: [goals]
+      summary: Update user nutrition goals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGoalsBody"
+      responses:
+        "200":
+          description: Updated goals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goals"
+
+  /ai/analyze-food:
+    post:
+      operationId: analyzeFood
+      tags: [ai]
+      summary: Analyze food from image using AI
+      description: Upload an image to identify African & Caribbean dishes and get nutritional estimates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeFoodBody"
+      responses:
+        "200":
+          description: AI food analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodAnalysisResult"
+
+  /ai/suggest-foods:
+    get:
+      operationId: suggestFoods
+      tags: [ai]
+      summary: Get AI-powered food suggestions
+      description: Get personalized food suggestions based on nutritional gaps
+      responses:
+        "200":
+          description: Food suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FoodSuggestion"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Food:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        localName:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        region:
+          type: string
+        category:
+          type: string
+        servingSize:
+          type: number
+        servingUnit:
+          type: string
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fat:
+          type: number
+        fiber:
+          type: ["number", "null"]
+        sugar:
+          type: ["number", "null"]
+        sodium:
+          type: ["number", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - region
+        - category
+        - servingSize
+        - servingUnit
+        - calories
+        - protein
+        - carbs
+        - fat
+        - tags
+        - createdAt
+
+    MealEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        foodId:
+          type: integer
+        foodName:
+          type: string
+        foodRegion:
+          type: string
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+        servings:
+          type: number
+        servingSize:
+          type: number
+        servingUnit:
+          type: string
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fat:
+          type: number
+        loggedAt:
+          type: string
+        notes:
+          type: ["string", "null"]
+      required:
+        - id
+        - foodId
+        - foodName
+        - foodRegion
+        - mealType
+        - servings
+        - servingSize
+        - servingUnit
+        - calories
+        - protein
+        - carbs
+        - fat
+        - loggedAt
+
+    CreateMealBody:
+      type: object
+      properties:
+        foodId:
+          type: integer
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+        servings:
+          type: number
+        loggedAt:
+          type: string
+        notes:
+          type: string
+      required:
+        - foodId
+        - mealType
+        - servings
+
+    UpdateMealBody:
+      type: object
+      properties:
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+        servings:
+          type: number
+        notes:
+          type: string
+
+    DailyNutrition:
+      type: object
+      properties:
+        date:
+          type: string
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFat:
+          type: number
+        totalFiber:
+          type: number
+        mealCount:
+          type: integer
+        meals:
+          type: array
+          items:
+            $ref: "#/components/schemas/MealEntry"
+      required:
+        - date
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFat
+        - totalFiber
+        - mealCount
+        - meals
+
+    NutritionStreaks:
+      type: object
+      properties:
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        totalDaysLogged:
+          type: integer
+        thisWeekDays:
+          type: integer
+        topFoods:
+          type: array
+          items:
+            type: object
+            properties:
+              foodName:
+                type: string
+              count:
+                type: integer
+            required:
+              - foodName
+              - count
+      required:
+        - currentStreak
+        - longestStreak
+        - totalDaysLogged
+        - thisWeekDays
+        - topFoods
+
+    Goals:
+      type: object
+      properties:
+        id:
+          type: integer
+        dailyCalories:
+          type: number
+        dailyProtein:
+          type: number
+        dailyCarbs:
+          type: number
+        dailyFat:
+          type: number
+        dailyFiber:
+          type: number
+        updatedAt:
+          type: string
+      required:
+        - id
+        - dailyCalories
+        - dailyProtein
+        - dailyCarbs
+        - dailyFat
+        - dailyFiber
+        - updatedAt
+
+    UpdateGoalsBody:
+      type: object
+      properties:
+        dailyCalories:
+          type: number
+        dailyProtein:
+          type: number
+        dailyCarbs:
+          type: number
+        dailyFat:
+          type: number
+        dailyFiber:
+          type: number
+
+    AnalyzeFoodBody:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64 encoded image data
+        mimeType:
+          type: string
+          description: Image MIME type (e.g. image/jpeg)
+      required:
+        - imageBase64
+
+    FoodAnalysisResult:
+      type: object
+      properties:
+        identified:
+          type: boolean
+        dishName:
+          type: ["string", "null"]
+        localName:
+          type: ["string", "null"]
+        region:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        estimatedCalories:
+          type: ["number", "null"]
+        estimatedProtein:
+          type: ["number", "null"]
+        estimatedCarbs:
+          type: ["number", "null"]
+        estimatedFat:
+          type: ["number", "null"]
+        servingSize:
+          type: ["number", "null"]
+        servingUnit:
+          type: ["string", "null"]
+        confidence:
+          type: ["number", "null"]
+        matchedFoodId:
+          type: ["integer", "null"]
+        suggestions:
+          type: array
+          items:
+            type: string
+      required:
+        - identified
+        - suggestions
+
+    FoodSuggestion:
+      type: object
+      properties:
+        food:
+          $ref: "#/components/schemas/Food"
+        reason:
+          type: string
+        nutrientHighlight:
+          type: string
+      required:
+        - food
+        - reason
+        - nutrientHighlight
