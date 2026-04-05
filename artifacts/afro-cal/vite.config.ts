@@ -1,24 +1,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { resolve } from "path";
+import path from "path";
 
 export default defineConfig({
-  // Use absolute root to prevent any folder confusion
-  root: process.cwd(), 
-  base: "./",
+  base: "./", 
   plugins: [react()],
   resolve: {
     alias: {
-      "@": resolve(process.cwd(), "src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        main: resolve(process.cwd(), "index.html"),
-      },
-    },
-  },
+  }
 });
